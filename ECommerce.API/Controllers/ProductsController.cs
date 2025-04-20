@@ -1,5 +1,6 @@
-﻿using ECommerce.Application.Interfaces.DTOs;
+﻿using ECommerce.Application.DTOs;
 using ECommerce.Application.Interfaces.Repositories;
+using ECommerce.Application.Interfaces.Services;
 using ECommerce.Domain.Entities;
 using ECommerce.Persistence.Contexts;
 using Microsoft.AspNetCore.Http;
@@ -13,21 +14,26 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IGenericRepository<Product> _repository;
+        private readonly IProductService _service;
 
-        public ProductsController(IGenericRepository<Product> repository)
+        public ProductsController(IProductService service)
         {
-            _repository = repository;
+            _service = service;
         }
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
-            return Ok( await _repository.GetAllAsync());
+            return Ok( await _service.GetAllProductsAsync());
+        }
+        [HttpGet("getAllWithCategory")]
+        public async Task<IActionResult> GetAllProductsWithCategory()
+        {
+            return Ok(await _service.GetProductsWithCategoryAsync());
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            var product = await _repository.GetByIdAsync(id);
+            var product = await _service.GetProductByIdWithCategoryAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -54,20 +60,22 @@ namespace ECommerce.API.Controllers
                 CategoryId = productFromRequest.CategoryId,
                 ProductBrandId = productFromRequest.ProductBrandId
             };
-            await _repository.AddAsync(product);
+            await _service.AddProductAsync(product);
             return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, [FromBody] ProductDto productFromRequest)
         {
-            var product = await _repository.GetByIdAsync(id);
+            var product = await _service.GetProductByIdAsync(id);
+
             if (product == null || product.Id != id)
             {
                 return NotFound();
             }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
             product.Name = productFromRequest.Name;
             product.Description = productFromRequest.Description;
             product.Price = productFromRequest.Price;
@@ -75,35 +83,35 @@ namespace ECommerce.API.Controllers
             product.ImageUrl = productFromRequest.ImageUrl;
             product.CategoryId = productFromRequest.CategoryId;
             product.ProductBrandId = productFromRequest.ProductBrandId;
-            await _repository.UpdateAsync(product);
+
+            await _service.UpdateProductAsync(product);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product= await _repository.GetByIdAsync(id);
+            var product= await _service.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            await _repository.DeleteAsync(product);
+            await _service.DeleteProductAsync(product);
             return NoContent();
         }
 
         [HttpGet("search")]
         public async Task<IActionResult> GetSearchProduct([FromQuery] string query)
         {
-            var products = await _repository
-                .FindAsync(p => p.Name.Contains(query)
-                || p.Description.Contains(query));
+            var products = await _service
+                .SearchProductsAsync(query);
             return Ok(products);
         }
 
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetProductcategory(int categoryId)
         {
-            var products =await _repository.FindAsync(p => p.CategoryId == categoryId);
+            var products =await _service.GetProductsByCategoryAsync(categoryId);
             if (products == null)
             {
                 return NotFound();

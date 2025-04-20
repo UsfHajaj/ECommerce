@@ -1,8 +1,11 @@
 using ECommerce.Application.Interfaces.Repositories;
+using ECommerce.Application.Interfaces.Services;
 using ECommerce.Domain.Entities.Identity;
+using ECommerce.Infrastructure;
 using ECommerce.Persistence.Config;
 using ECommerce.Persistence.Contexts;
 using ECommerce.Persistence.Repositories;
+using ECommerce.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -11,26 +14,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
 
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddSwaggerServices();
 
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddAuthenticationServices(builder.Configuration);
 
 // Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "ECommerce API",
-        Version = "v1",
-        Description = "API documentation for ECommerce system"
-    });
-});
+
 
 
 var app = builder.Build();
@@ -38,13 +30,17 @@ var app = builder.Build();
 // Enable Swagger middleware
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "ECommerce API V1");
-        options.RoutePrefix = string.Empty; // Swagger at root URL
-    });
+    app.UseSwagger(); 
+    app.UseSwaggerUI(); 
 }
+
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/swagger");
+    return Task.CompletedTask;
+});
+
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -59,10 +55,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Middleware
+app.UseStaticFiles();
 app.UseHttpsRedirection();
+app.UseCors("MyPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-
