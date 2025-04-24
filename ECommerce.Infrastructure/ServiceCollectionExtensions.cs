@@ -25,12 +25,19 @@ namespace ECommerce.Infrastructure
     {
         public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoriesRepository, CategoriesRepository>();
             services.AddScoped<ICategoriesService, CategoriesService>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<ICartServices, CartServices>();
+            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IPaymentService, PaymentService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

@@ -59,6 +59,11 @@ namespace ECommerce.Persistence.Contexts
                         .WithMany(p => p.Reviews) 
                         .HasForeignKey(r => r.ProductId) 
                         .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Review>()
+                        .HasOne(r => r.User)
+                        .WithMany(p => p.Reviews)
+                        .HasForeignKey(r => r.UserId)
+                        .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<ApplicationUser>()
                         .HasOne(a => a.Address)
                         .WithOne(b => b.ApplicationUser)
@@ -81,6 +86,11 @@ namespace ECommerce.Persistence.Contexts
             builder.Entity<CartItem>()
                         .Property(c => c.Price)
                         .HasPrecision(18, 2);
+            builder.Entity<Sellers>()
+                        .HasOne(m => m.ProductBrand)
+                        .WithOne(m => m.Sellers)
+                        .HasForeignKey<ProductBrand>(m => m.sellerId)
+                        .IsRequired(false);
         }
 
         public DbSet<Address> Addresses { get; set; }
@@ -94,6 +104,7 @@ namespace ECommerce.Persistence.Contexts
         public DbSet<Shipping> Shippings { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ProductBrand> ProductBrands { get; set; }
+        public DbSet<Sellers> Sellers { get; set; }
 
     }
 }

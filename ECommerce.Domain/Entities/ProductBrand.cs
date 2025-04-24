@@ -12,5 +12,7 @@ namespace ECommerce.Domain.Entities
     {
         public string Name { get; set; }
         public List<Product> Products { get; set; } = new List<Product>();
+        public string? sellerId { get; set; }
+        public Sellers Sellers { get; set; }
     }
 }

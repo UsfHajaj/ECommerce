@@ -9,11 +9,11 @@ namespace ECommerce.Domain.Entities.Enums
 {
     public enum OrderStatus
     {
-        [EnumMember(Value = "Pending")]
         Pending,
-        [EnumMember(Value = "PaymentRecieved")]
-        PaymentRecieved,
-        [EnumMember(Value = "PaymentFailed")]
-        PaymentFailed
+        Processing,
+        Shipped,
+        Delivered,
+        Cancelled,
+        Refunded
     }
 }

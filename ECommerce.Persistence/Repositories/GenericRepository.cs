@@ -24,7 +24,7 @@ namespace ECommerce.Persistence.Repositories
         }
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _dbSet.ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(int id)

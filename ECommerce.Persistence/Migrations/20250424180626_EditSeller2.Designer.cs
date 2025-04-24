@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerce.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250419185808_InitMigration")]
-    partial class InitMigration
+    [Migration("20250424180626_EditSeller2")]
+    partial class EditSeller2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -303,7 +303,14 @@ namespace ECommerce.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("sellerId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("sellerId")
+                        .IsUnique()
+                        .HasFilter("[sellerId] IS NOT NULL");
 
                     b.ToTable("ProductBrands");
                 });
@@ -557,6 +564,19 @@ namespace ECommerce.Persistence.Migrations
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
+            modelBuilder.Entity("ECommerce.Domain.Entities.Identity.Sellers", b =>
+                {
+                    b.HasBaseType("ECommerce.Domain.Entities.Identity.ApplicationUser");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("Sellers");
+                });
+
             modelBuilder.Entity("ECommerce.Domain.Entities.Cart.Cart", b =>
                 {
                     b.HasOne("ECommerce.Domain.Entities.Identity.ApplicationUser", "User")
@@ -669,6 +689,15 @@ namespace ECommerce.Persistence.Migrations
                     b.Navigation("ProductBrand");
                 });
 
+            modelBuilder.Entity("ECommerce.Domain.Entities.ProductBrand", b =>
+                {
+                    b.HasOne("ECommerce.Domain.Entities.Identity.Sellers", "Sellers")
+                        .WithOne("ProductBrand")
+                        .HasForeignKey("ECommerce.Domain.Entities.ProductBrand", "sellerId");
+
+                    b.Navigation("Sellers");
+                });
+
             modelBuilder.Entity("ECommerce.Domain.Entities.Review", b =>
                 {
                     b.HasOne("ECommerce.Domain.Entities.Product", "Product")
@@ -678,7 +707,7 @@ namespace ECommerce.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("ECommerce.Domain.Entities.Identity.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -773,6 +802,14 @@ namespace ECommerce.Persistence.Migrations
             modelBuilder.Entity("ECommerce.Domain.Entities.Identity.ApplicationUser", b =>
                 {
                     b.Navigation("Address")
+                        .IsRequired();
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("ECommerce.Domain.Entities.Identity.Sellers", b =>
+                {
+                    b.Navigation("ProductBrand")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

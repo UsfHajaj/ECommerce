@@ -2,16 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ECommerce.Domain.Entities.Identity
 {
-    public class ApplicationUser:IdentityUser
+    public class Sellers:ApplicationUser
     {
-        public string DisplayName { get; set; }
-        public Address Address { get; set; }
-        public ICollection<Review> Reviews { get; set; }
+        public string? Description { get; set; }
+        public string? ImageUrl { get; set; }
+        public ProductBrand ProductBrand { get; set; }
     }
 }
